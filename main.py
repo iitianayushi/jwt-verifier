@@ -21,6 +21,9 @@ class VerifySucessResponse(BaseModel):
     email: str
     sub: str
     aud: str
+@app..get("/")
+def read_root():
+    return {"status": "Serverless FastAPI is running"}
 @app.post("/verify")
 async def verify_token(payload: VerifyRequest):
     try:
@@ -31,15 +34,25 @@ async def verify_token(payload: VerifyRequest):
             audience=EXPECTED_AUDIENCE,
             issuer=EXPECTED_ISSUER
         )
+        audience_claim = decoded_payload.get("aud", "")
+        if isinstance(audience_claim, list):
+            audience_str = audience_claim[0] if audience_claim else ""
+        else:
+            audience_str = audience_claim
         return VerifySuccessResponse(
             valid=True,
             email=decoded_payload.get("email", ""),
             sub=decoded_payload.get("sub", ""),
-            aud=decoded_payload.get("aud", "")
+            aud=audience_str
              
             
         )
     except InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"valid": False}
+        )
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"valid": False}
