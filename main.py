@@ -16,18 +16,18 @@ EXPECTED_ISSUER = "https://idp.exam.local"
 EXPECTED_AUDIENCE = "tds-31xtcf1r.apps.exam.local"
 class VerifyRequest(BaseModel):
     token: str
-class VerifySucessResponse(BaseModel):
+class VerifySuccessResponse(BaseModel):
     valid: bool
     email: str
     sub: str
     aud: str
-@app..get("/")
+@app.get("/")
 def read_root():
     return {"status": "Serverless FastAPI is running"}
 @app.post("/verify")
 async def verify_token(payload: VerifyRequest):
     try:
-        decoded_token = jwt.decode(
+        decoded_payload = jwt.decode(
             payload.token,
             PUBLIC_KEY,
             algorithms=["RS256"],
